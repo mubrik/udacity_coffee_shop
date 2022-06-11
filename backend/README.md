@@ -32,14 +32,18 @@ This will install all of the required packages we selected within the `requireme
 
 ## Running the server
 
-From within the `./src` directory first ensure you are working using your created virtual environment.
+From within the `./backend` directory first ensure you are working using your created virtual environment.
+if your `.flaskenv`file hasnt been changed, run:
+```bash
+flask run
+```
 
+If you dont have a `.flaskenv` file or it has been chnaged
 Each time you open a new terminal session, run:
 
 ```bash
-export FLASK_APP=api.py;
+export FLASK_APP=app;
 ```
-
 To run the server, execute:
 
 ```bash
@@ -79,9 +83,3 @@ The `--reload` flag will detect file changes and restart the server automaticall
    - Run the collection and correct any errors.
    - Export the collection overwriting the one we've included so that we have your proper JWTs during review!
 
-### Implement The Server
-
-There are `@TODO` comments throughout the `./backend/src`. We recommend tackling the files in order and from top to bottom:
-
-1. `./src/auth/auth.py`
-2. `./src/api.py`

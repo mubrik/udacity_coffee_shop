@@ -25,8 +25,8 @@ def create_app(name="app", config: None|Dict=None) -> Tuple[Flask, SQLAlchemy]:
   db = SQLAlchemy(app)
   # setup migration
   migrate = Migrate(app, db)
-  # setup cors
-  cors = CORS(app, resources={"r*/api/*": {"origins": "*"}})
+  # setup cors for api routes and specific origin
+  cors = CORS(app, resources={r"/api/*": {"CORS_ORIGINS": "http://127.0.0.1:3000/"}})
   # return
   return [app, db]
   

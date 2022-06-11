@@ -1,28 +1,19 @@
 '''
   handler to start tests
 '''
-import os
-import unittest
-from dotenv import load_dotenv
-from app.setup import create_app
+import sys, unittest
 
-# load env
-load_dotenv()
+# add args to sys.path
+sys.argv.append('--testApp')
 
-# get test db uri
-database_uri = os.environ.get('TEST_DB_URI')
-
-# Define the WSGI application object
-app, db = create_app(__name__, {
-  'SQLALCHEMY_DATABASE_URI': database_uri,
-  'SQLALCHEMY_ECHO': True,
-  'SQLALCHEMY_TRACK_MODIFICATIONS': False,
-})
-print("app testing init name:", __name__)
+# import app
+from app import *
 
 # import test cases
-from app.auth.tests import AuthTestCase
+from app.user.tests import UserTestCase
 from app.drink.tests import DrinkTestCase
 
 if __name__ == '__main__':
-  unittest.main()
+  sys.argv.remove('--testApp')
+  unittest.main(verbosity=2)
+  pass

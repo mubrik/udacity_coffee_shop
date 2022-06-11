@@ -6,7 +6,7 @@ from app import app, db
 
 class DrinkTestCase(unittest.TestCase):
   '''
-    base class for auth tests
+    base class for drink tests
   '''
   def setUp(self):
     '''
@@ -30,12 +30,11 @@ class DrinkTestCase(unittest.TestCase):
     '''
     pass
   
-  
-  def test_something(self):
+  def test_get_drinks(self):
     '''
-      test something
+      test get drinks
     '''
-    result = self.client().get('/api/drink/test')
+    result = self.client().get('/api/drinks')
     self.assertEqual(result.status_code, 200)
-    self.assertIn('drink', result.json['message'])
-    pass
+    self.assertIn('drinks', result.json)
+  

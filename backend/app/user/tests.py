@@ -1,12 +1,27 @@
 '''
-  holds test cases for the auth module
+  holds test cases for the user module
 '''
 import unittest
 from app import app, db
+from dotenv import load_dotenv
+from os import environ as env
+import http.client
 
-class AuthTestCase(unittest.TestCase):
+# loadenv .env
+load_dotenv()
+
+# get env variables
+AUTH0_DOMAIN = env.get("AUTH0_DOMAIN")
+API_AUDIENCE = env.get("API_AUDIENCE")
+CLIENT_ID=env.get("AUTH0_CLIENT_ID")
+CLIENT_SECRET=env.get("AUTH0_CLIENT_SECRET")
+ALGORITHMS = env.get("ALGORITHMS", ['RS256'])
+
+# implement uittest later
+
+class UserTestCase(unittest.TestCase):
   '''
-    base class for auth tests
+    base class for user tests
   '''
   def setUp(self):
     '''
@@ -31,11 +46,12 @@ class AuthTestCase(unittest.TestCase):
     pass
   
   
-  def test_something(self):
+  def test_basic_route(self):
     '''
       test something
     '''
-    result = self.client().get('/api/auth/test')
+    result = self.client().get('/api/users/test')
     self.assertEqual(result.status_code, 200)
     self.assertIn('test', result.json['message'])
-    pass
+    
+  

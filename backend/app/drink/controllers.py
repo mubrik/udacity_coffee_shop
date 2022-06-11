@@ -2,7 +2,8 @@
   holds the blueprint routes for drink
 '''
 from typing import List
-from flask import Blueprint,request, jsonify
+from flask import Blueprint,request, jsonify, abort
+import sqlalchemy
 from .models import Drink
 # auth decorators
 from ..auth import requires_authentication, requires_authorization, AuthError
@@ -11,23 +12,14 @@ from app import db
 # drink bp
 drink_bp = Blueprint('drink', __name__)
 
-@drink_bp.after_request
-def after(response):
-  # add to headers after controllers
-  response.headers.add('Access-Control-Allow-Headers',
-                       'Content-Type,Authorization,true')
-  response.headers.add('Access-Control-Allow-Methods',
-                       'GET,PATCH,POST,DELETE')
-  return response
-
-@drink_bp.route('/test')
+@drink_bp.route('/drink/test')
 def test():
   # test
   return jsonify({'message': 'drink'})
 
 
 @drink_bp.route('/drinks', methods=['GET'])
-@requires_authentication
+# @requires_authentication
 def get_drinks():
   drinks: List[Drink] = Drink.query.all()
   return jsonify({
@@ -38,7 +30,7 @@ def get_drinks():
 
 @drink_bp.route('/drinks-detail', methods=['GET'])
 @requires_authorization('get:drinks-detail')
-def get_drinks_detail():
+def get_drinks_detail(permission: str|List[str]):
   drinks: List[Drink] = Drink.query.all()
   return jsonify({
     'success': True,
@@ -48,7 +40,7 @@ def get_drinks_detail():
 
 @drink_bp.route('/drinks', methods=['POST'])
 @requires_authorization('post:drinks')
-def post_drink():
+def post_drink(permission: str|List[str]):
   # get data from request
   data = request.get_json()
   # check if title is in data
@@ -57,14 +49,22 @@ def post_drink():
       'success': False,
       'message': 'title and recipe required'
     }), 400
-    # create drink
-  drink = Drink(title=data['title'], recipe=data['recipe'])
+  # create drink
+  if type(data['recipe']) is dict:
+    # postman data is json dict, edge case but watching it
+    drink = Drink(title=data['title'], recipe=[data['recipe']])
+  else:
+    drink = Drink(title=data['title'], recipe=data['recipe'])
   # insert drink
   try:
     returned_data = drink.insert().format()
+  except sqlalchemy.exc.IntegrityError:
+    # failed to insert becaus not unique
+    abort(422, "Title is not unique")
   except Exception as e:
-    print(e)
+    # other exception
     db.session.rollback()
+    abort(500, "Internal server error")
   finally:
     db.session.close()
   # return drink
@@ -76,11 +76,11 @@ def post_drink():
   
 @drink_bp.route('/drinks/<int:id>', methods=['PATCH'])
 @requires_authorization('patch:drinks')
-def patch_drink(id):
+def patch_drink(permission: str|List[str], id):
   # get data from request
   data = request.get_json()
-  # check if title is in data
-  if 'title' not in data or 'recipe' not in data:
+  # check if title is in data, one of the two is required
+  if 'title' not in data and 'recipe' not in data:
     return jsonify({
       'success': False,
       'message': 'title and recipe required'
@@ -93,14 +93,18 @@ def patch_drink(id):
       'success': False,
       'message': 'drink not found'
     }), 404
-    # update drink
-  drink.title = data['title']
-  drink.recipe = data['recipe']
+  # update drink
+  for key, value in data.items():
+    setattr(drink, key, value)
   try:
     returned_data = drink.update().format()
+  except sqlalchemy.exc.IntegrityError:
+    # failed to update becaus not unique
+    abort(422, "Recipe with that title already exists")
   except Exception as e:
     print(e)
     db.session.rollback()
+    abort(500, "Internal server error")
   finally:
     db.session.close()
     
@@ -113,7 +117,7 @@ def patch_drink(id):
 
 @drink_bp.route('/drinks/<int:id>', methods=['DELETE'])
 @requires_authorization('delete:drinks')
-def delete_drink(id):
+def delete_drink(permission: str|List[str], id):
   # get drink
   drink: Drink|None = Drink.query.filter(Drink.id == id).one_or_none()
   # check if drink exists
@@ -128,13 +132,15 @@ def delete_drink(id):
   except Exception as e:
     print(e)
     db.session.rollback()
+    abort(500, "Internal server error")
   finally:
     db.session.close()
   # return drink
   return jsonify({
     'success': True,
-    'drinks': id
+    'delete': id
   })
+
 
 '''
 @TODO uncomment the following line to initialize the datbase
@@ -208,22 +214,21 @@ Example error handling for unprocessable entity
 
 @drink_bp.errorhandler(AuthError)
 def handle_auth_error(exception: AuthError):
-  response = jsonify({
+  return jsonify({
     'success': False,
-    'code': exception.error['code'],
-    'error': exception.error['error'],
-    'message': exception.error['description']
-  })
-  response.status_code = exception.error['code']
-  return response
+    'code': exception.code,
+    'error': exception.error,
+    'message': exception.description
+  }), exception.code
 
 
 @drink_bp.errorhandler(422)
-def unprocessable(error):
+def handle_422(error):
+  # bad syntax
   return jsonify({
-    "success": False,
-    "error": 422,
-    "message": "unprocessable"
+      "success": False,
+      "message": error.description if error.description is not None else "Error in Query/Data",
+      "error": 422
   }), 422
 
 
@@ -236,6 +241,16 @@ def handle_404(error):
       "message": error.description if error.description is not None else "Resource not Found",
       "error": 404
   }), 404
+  
+@drink_bp.errorhandler(400)
+def handle_400(error):
+  # Not Found
+  print(error.description)
+  return jsonify({
+      "success": False,
+      "message": error.description if error.description is not None else "Bad Syntax",
+      "error": 400
+  }), 400
 
 
 @drink_bp.errorhandler(405)
@@ -253,6 +268,6 @@ def handle_503(error):
   # Server cannot process the request
   return jsonify({
       "success": False,
-      "message": "System Busy",
+      "message": error.description if error.description is not None else "System Busy",
       "error": 503
   }), 503

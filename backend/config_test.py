@@ -5,11 +5,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Statement for enabling the development environment
-DEBUG = os.environ.get("DEBUG", True)
+DEBUG = os.environ.get("DEBUG", False) # false for testing
 
 # Define the application directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-DB_PATH = os.path.join(BASE_DIR, 'coffee_shop.db')
+DB_PATH = os.path.join(BASE_DIR, 'coffee_shop_tests.db')
 
 # Define the database - we are working with
 # SQLLITE_DB for sql lite, DB_URI for postgres

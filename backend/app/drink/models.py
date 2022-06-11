@@ -72,13 +72,14 @@ class Drink(Base):
     return self
   
   def short(self):
-    short_recipe = [
-      {'color': rec['color'], 'parts': rec['parts']} for rec in self.recipe
-    ]
+    print(self.recipe)
+    # short_recipe = [
+    #   {'color': rec['color'], 'parts': rec['parts']} for rec in self.recipe
+    # ]
     return {
       'id': self.id,
       'title': self.title,
-      'recipe': short_recipe
+      'recipe': self.recipe
     }
     
   def long(self):

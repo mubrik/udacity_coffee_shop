@@ -1,7 +1,6 @@
 '''
   holds the blueprint routes for drink
 '''
-from typing import List
 from flask import Blueprint,request, jsonify, abort
 import sqlalchemy
 from .models import Drink
@@ -21,7 +20,7 @@ def test():
 @drink_bp.route('/drinks', methods=['GET'])
 # @requires_authentication
 def get_drinks():
-  drinks: List[Drink] = Drink.query.all()
+  drinks = Drink.query.all()
   return jsonify({
     'success': True,
     'drinks': [drink.short() for drink in drinks]
@@ -30,8 +29,8 @@ def get_drinks():
 
 @drink_bp.route('/drinks-detail', methods=['GET'])
 @requires_authorization('get:drinks-detail')
-def get_drinks_detail(permission: str|List[str]):
-  drinks: List[Drink] = Drink.query.all()
+def get_drinks_detail(permission):
+  drinks = Drink.query.all()
   return jsonify({
     'success': True,
     'drinks': [drink.format() for drink in drinks]
@@ -40,7 +39,7 @@ def get_drinks_detail(permission: str|List[str]):
 
 @drink_bp.route('/drinks', methods=['POST'])
 @requires_authorization('post:drinks')
-def post_drink(permission: str|List[str]):
+def post_drink(permission):
   # get data from request
   data = request.get_json()
   # check if title is in data
@@ -76,7 +75,7 @@ def post_drink(permission: str|List[str]):
   
 @drink_bp.route('/drinks/<int:id>', methods=['PATCH'])
 @requires_authorization('patch:drinks')
-def patch_drink(permission: str|List[str], id):
+def patch_drink(permission, id):
   # get data from request
   data = request.get_json()
   # check if title is in data, one of the two is required
@@ -86,7 +85,7 @@ def patch_drink(permission: str|List[str], id):
       'message': 'title and recipe required'
     }), 400
     # get drink
-  drink: Drink|None = Drink.query.filter(Drink.id == id).one_or_none()
+  drink = Drink.query.filter(Drink.id == id).one_or_none()
   # check if drink exists
   if drink is None:
     return jsonify({
@@ -117,9 +116,9 @@ def patch_drink(permission: str|List[str], id):
 
 @drink_bp.route('/drinks/<int:id>', methods=['DELETE'])
 @requires_authorization('delete:drinks')
-def delete_drink(permission: str|List[str], id):
+def delete_drink(permission, id):
   # get drink
-  drink: Drink|None = Drink.query.filter(Drink.id == id).one_or_none()
+  drink = Drink.query.filter(Drink.id == id).one_or_none()
   # check if drink exists
   if drink is None:
     return jsonify({
@@ -213,7 +212,7 @@ Example error handling for unprocessable entity
 '''
 
 @drink_bp.errorhandler(AuthError)
-def handle_auth_error(exception: AuthError):
+def handle_auth_error(exception):
   return jsonify({
     'success': False,
     'code': exception.code,

@@ -1,7 +1,6 @@
 '''
   holds the blueprint routes for users
 '''
-from typing import List
 from flask import Blueprint, jsonify, request, abort
 from .models import User
 from ..auth import AuthError, auth_management as auth_m, requires_authentication, requires_authorization
@@ -17,7 +16,7 @@ def test():
 
 @user_bp.route('/baristas/edit', methods=['POST', 'DELETE'])
 @requires_authorization(['post:baristas', 'post:managers'])
-def manage_barista(permission: str|List[str]):
+def manage_barista(permission):
   data = request.get_json()
   user_id = data['user_id']
   roles = ['rol_PRrubjxSFgct2EQ2'] # barista role id
@@ -53,7 +52,7 @@ def manage_barista(permission: str|List[str]):
   
 @user_bp.route('/managers/edit', methods=['POST', 'DELETE'])
 @requires_authorization('post:managers')
-def manage_manager(permission: str|List[str]):
+def manage_manager(permission):
   data = request.get_json()
   user_id = data['user_id']
   roles = ['rol_VTeR8Pn9PCmMVWqI'] # manager role id
@@ -88,7 +87,6 @@ def manage_manager(permission: str|List[str]):
 @user_bp.route('/baristas/<barista_id>', methods=['PATCH'])
 @requires_authorization(['update:baristas', 'update:managers'])
 def update_barista(permissions, barista_id):
-  print(permissions, barista_id)
   # get data
   request_data = request.get_json()
   user_id = request_data['user_id']
@@ -99,7 +97,6 @@ def update_barista(permissions, barista_id):
     
   # verify user role of request
   user_roles = auth_m.users.list_roles(id=user_id)['roles']
-  print('userroles:', user_roles)
   if len(list(filter(lambda x: x['name'] == 'Administrator', user_roles))) > 0:
     # user is an admin, cant update
     raise AuthError(description='User is an admin, cant update', code=403)
@@ -116,7 +113,7 @@ def update_barista(permissions, barista_id):
 
 
 @user_bp.errorhandler(AuthError)
-def handle_auth_error(exception: AuthError):
+def handle_auth_error(exception):
   return jsonify({
     'success': False,
     'code': exception.code,

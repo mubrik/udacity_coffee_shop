@@ -1,5 +1,4 @@
 import json
-from typing import List
 from flask import request
 from functools import wraps
 from jose import jwt
@@ -60,7 +59,7 @@ def get_token_auth_header():
   return split_auth_header[1]
 
 
-def verify_decode_jwt(token: str):
+def verify_decode_jwt(token):
   """
     checks Access Token for validity
     Args:
@@ -107,7 +106,7 @@ def verify_decode_jwt(token: str):
   raise AuthError(description='Unable to find RSA key', error='invalid_header', code=403)
   
 
-def check_permissions(required_perm: str|List[str], payload):
+def check_permissions(required_perm, payload):
   """
     Determines if the required scope is present in the Access Token
     Args:

@@ -1,9 +1,8 @@
 '''
   init file, set up the app/tests
 '''
-import sys, os, unittest
+import sys
 from dotenv import load_dotenv
-from typing import Dict, Tuple
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -13,7 +12,7 @@ from flask_cors import CORS
 load_dotenv()
 
 # create app function
-def create_app(name="app", config: None|Dict=None, testing=False) -> Tuple[Flask, SQLAlchemy]:
+def create_app(name="app", config=None, testing=False):
   '''
     creates app, accepts name and config
     config allows for passing testing configs
@@ -67,6 +66,9 @@ app.register_blueprint(drink_blueprint, url_prefix='/api')
 # Build the database, This will create the database file using SQLAlchemy
 # check testApp arg
 if '--testApp' not in sys.argv: db.create_all()
+
+# import cli functons
+from .utils import *
 
 # app = None
 # db = None

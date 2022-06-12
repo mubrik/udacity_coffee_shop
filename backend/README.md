@@ -34,8 +34,13 @@ This will install all of the required packages we selected within the `requireme
 
 From within the `./backend` directory first ensure you are working using your created virtual environment.
 if your `.flaskenv`file hasnt been changed, run:
+
 ```bash
 flask run
+```
+or :
+```bash
+python run.py
 ```
 
 If you dont have a `.flaskenv` file or it has been chnaged
@@ -52,7 +57,29 @@ flask run --reload
 
 The `--reload` flag will detect file changes and restart the server automatically.
 
-## Tasks
+## Database Creation/Drop
+In another terminal(activated) you have commands available to manipulate the db
+to drop db tables:
+```bash
+flask app dbtables drop
+```
+to add db tables:
+```bash
+flask app dbtables create
+```
+to create new drinks:
+Note: only run once or after droping rows/tables to avoid NOT NULL constraint
+```bash
+flask app dbrows create
+```
+to clear all created rows
+```bash
+flask app dbrows drop
+```
+to view all db row items
+```bash
+flask app dbrows get
+```
 
 ### Setup Auth0
 

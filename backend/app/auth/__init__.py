@@ -21,6 +21,9 @@ CLIENT_ID=env.get("AUTH0_CLIENT_ID")
 CLIENT_SECRET=env.get("AUTH0_CLIENT_SECRET")
 ALGORITHMS = env.get("ALGORITHMS", ['RS256'])
 
+if not AUTH0_DOMAIN or not API_AUDIENCE or not CLIENT_ID or not CLIENT_SECRET:
+  raise ValueError('Missing AUTH0_DOMAIN, API_AUDIENCE, CLIENT_ID or CLIENT_SECRET environment variables.')
+
 # create a new instance of the Auth0 GetToken class
 get_token = GetToken(AUTH0_DOMAIN)
 token = get_token.client_credentials(CLIENT_ID,
@@ -157,16 +160,16 @@ def requires_authorization(permission=''):
   return requires_auth_decorator
 
 # oauth instance
-oauth = OAuth(app)
+# oauth = OAuth(app)
 
-oauth.register(
-  "coffee_auth",
-  client_id=CLIENT_ID,
-  client_secret=CLIENT_SECRET,
-  client_kwargs={
-    "scope": "openid profile email",
-  },
-  server_metadata_url=f'https://{AUTH0_DOMAIN}/.well-known/openid-configuration'
-)
+# oauth.register(
+#   "coffee_auth",
+#   client_id=CLIENT_ID,
+#   client_secret=CLIENT_SECRET,
+#   client_kwargs={
+#     "scope": "openid profile email",
+#   },
+#   server_metadata_url=f'https://{AUTH0_DOMAIN}/.well-known/openid-configuration'
+# )
 
 # oauth implementation later

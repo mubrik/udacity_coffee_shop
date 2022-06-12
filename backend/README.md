@@ -30,6 +30,18 @@ This will install all of the required packages we selected within the `requireme
 
 - [jose](https://python-jose.readthedocs.io/en/latest/) JavaScript Object Signing and Encryption for JWTs. Useful for encoding, decoding, and verifying JWTS.
 
+## Environment variables
+
+Make sure you have a `.env` file in your `./backend/` directory with the following variables:
+```.env
+AUTH0_DOMAIN='yourdomain'
+AUTH0_CLIENT_ID='yourclientid'
+AUTH0_CLIENT_SECRET='yourclientsecret'
+ALGORITHMS=youralgos
+API_AUDIENCE='youraudience'
+```
+Running without this will raise a Detailed ValueError
+
 ## Running the server
 
 From within the `./backend` directory first ensure you are working using your created virtual environment.
